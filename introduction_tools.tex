@@ -1,0 +1,170 @@
+% Article Format: American Economic Review
+% Xin Tang @ Stony Brook University
+% Last Updated: August 2014
+\documentclass[twoside,12pt,leqno]{article}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                    Text Layout                       %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Page Layout
+\usepackage[hmargin={1.2in,1.2in},vmargin={1.5in,1.5in}]{geometry}
+\topmargin -1cm        % read Lamport p.163
+\oddsidemargin 0.04cm   % read Lamport p.163
+\evensidemargin 0.04cm  % same as oddsidemargin but for left-hand pages
+\textwidth 16.59cm
+\textheight 21.94cm
+\renewcommand\baselinestretch{1.15}
+\parskip 0.25em
+\parindent 1em
+\linespread{1}
+
+% Set header and footer
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhead{}
+\fancyhead[LE,RO]{\thepage}
+%\fancyhead[CE]{\textit{JI QI, XIN TANG AND XICAN XI}}
+%\fancyhead[CO]{\textit{THE SIZE DISTRIBUTION OF FIRMS AND INDUSTRIAL POLLUTION}}
+\cfoot{}
+\renewcommand{\headrulewidth}{0pt}
+%\renewcommand*\footnoterule{}
+%\setcounter{page}{1}
+
+% Font
+\renewcommand{\rmdefault}{ptm}
+\renewcommand{\sfdefault}{phv}
+%\usepackage[lite]{mtpro2}
+% use Palatinho-Roman as default font family
+%\renewcommand{\rmdefault}{ppl}
+\usepackage[scaled=0.88]{helvet}
+\makeatletter   % Roman Numbers
+\newcommand*{\rom}[1]{\expandafter\@slowromancap\romannumeral #1@}
+\makeatother
+\usepackage{CJK}
+
+% Section Titles
+\renewcommand\thesection{\textnormal{\textbf{\Roman{section}.}}}
+\renewcommand\thesubsection{\textnormal{\Alph{subsection}.}}
+\usepackage{titlesec}
+\titleformat*{\section}{\bf \center}
+\titleformat*{\subsection}{\it \center}
+\renewcommand{\refname}{\textnormal{REFERENCES}}
+
+% Appendix
+\usepackage[title]{appendix}
+\renewcommand{\appendixname}{APPENDIX}
+
+% Citations
+\usepackage[authoryear,comma]{natbib}
+\renewcommand{\bibfont}{\small}
+\setlength{\bibsep}{0em}
+\usepackage[%dvipdfmx,%
+            bookmarks=true,%
+            pdfstartview=FitH,%
+            breaklinks=true,%
+            colorlinks=true,%
+            %allcolors=black,%
+            citecolor=blue,
+            linkcolor=red,
+            pagebackref=true]{hyperref}
+
+% Functional Package
+\usepackage{enumerate}
+\usepackage{url}      % This package helps to typeset urls
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                    Mathematics                       %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{amsmath,amssymb,amsfonts,amsthm,mathrsfs,upgreek}
+% Operators
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\e}{\mathrm{e}}
+\DeclareMathOperator*{\argmax}{argmax}
+\DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator*{\plim}{plim}
+\renewcommand{\vec}[1]{\ensuremath{\mathbf{#1}}}
+\newcommand{\gvec}[1]{{\boldsymbol{#1}}}
+
+\newcommand{\code}{\texttt}
+\newcommand{\bcode}[1]{\texttt{\blue{#1}}}
+\newcommand{\rcode}[1]{\texttt{\red{#1}}}
+\newcommand{\rtext}[1]{{\red{#1}}}
+\newcommand{\btext}[1]{{\blue{#1}}}
+
+% New Environments
+\newtheorem{result}{Result}
+\newtheorem{assumption}{Assumption}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{definition}{Definition}
+\setlength{\unitlength}{1mm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                 Tables and Figures                   %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{threeparttable,booktabs,multirow,array} % This allows notes in tables
+\usepackage{floatrow} % For Figure Notes
+\floatsetup[table]{capposition=top}
+\usepackage[font={sc,footnotesize}]{caption}
+\DeclareCaptionLabelSeparator{aer}{---}
+\captionsetup[table]{labelsep=aer}
+\captionsetup[figure]{labelsep=period}
+\usepackage{graphicx,pstricks,epstopdf}
+
+\title{\vspace{-1cm}\Large{{\textsf{Using Modern Programming Tools in Macroeconomics}}}}
+\author{\normalsize\textsc{Xin Tang} \\ \normalsize\textsc{International Monetary Fund}}
+\date{\normalsize\today}
+
+\begin{document}
+\maketitle
+
+Modern quantitative macroeconomics relies heavily on solving models numerically. Moving beyond the realm of homework in graduate school, it is rarely the case that the program solving a model contains only several small files with no reliance on any third-party libraries at all. In addition, as the average scale of academic projects increases, nowadays a research project usually requires close collaboration among several researchers. The time when a simple command
+\begin{verbatim}
+$ gfortran main.f90 utility.f90 -o main.out -Ofast
+\end{verbatim}
+generates the executable \code{main.out} which consequently computes all the results fades distantly day by day.
+
+A typical program nowadays usually contains a large number of files each focuses on one task, draws heavily on well-tested numerical libraries, and involves several contributing researchers simultaneously. Computer scientists and software engineers have developed many tools that help make the development process of projects alike as seamless as possible. It is a bit unfortunate that these tools and the corresponding programming and software development paradigm were never introduced properly for an average graduate student in economics.
+
+To fill this gap, this note provides an introduction to a collection of commonly used open-source programming tools and numerical libraries available on most Linux-based systems. Specifically, they are
+\begin{itemize}
+    \item
+    \code{gfortran}: an open-source Fortran compiler from \textsc{Gcc}.
+    \item
+    \code{make}: a build automation tool facilitates building executable file from a large number of source files and libraries.
+    \item
+    \code{git}: a version-control system for tracking changes in source code during software development.
+    \item
+    \code{BLAS, ATLAS, LAPACK, MINPACK}: standard libraries for optimized numerical linear algebra and nonlinear optimization.
+\end{itemize}
+
+The note is organized as follows. We begin with an example of solving a system of nonlinear equations. This will familiarize the reader with programming under a Linux system. Using this example, we then provide a very brief overview of how source code is turned from textual files to an executable file, which helps us introduce \code{make} and explain how to use libraries distributed in binary format. Here, we will solve a system of linear equations calling routines in \code{LAPACK}, which is distributed in binary format. Finally, we show how to use \code{git} to track the history of changes of the source code, to revert the stage of a messy project to a previous status, and to collaborate effectively with other researchers without worrying about the pains and hassles caused by things like overwriting each other's work. For the last part, because I am currently refactoring the code of \citet{Azzimontietal:2014} with modern coding conventions, so I will use its development process as an example. Maybe I will consider crafting a simpler example in the future.
+
+\section{Compiling a Sophisticated Project}
+
+
+\section{Version Control and Collaboration}
+
+To initialize a \code{Git} repository, first create a repository on GitHub. Here I use my personal account and create a repository called \code{intro\_tool}. The url of the repository is
+{\color{blue}\begin{verbatim}
+https://github.com/zjutangxin/intro_tool
+\end{verbatim}}
+\noindent Next we add it as a new remote repository and name it as \code{origin} locally:
+\begin{verbatim}
+$ git clone https://github.com/zjutangxin/intro_tool
+\end{verbatim}
+which fetches everything on the remote repository and labels the remote repository as \code{origin}. We then copy a bunch of files to the local working directory and add files to the tracking list
+\begin{verbatim}
+$ git add ./**/*.f90
+  git add ./*.tex
+\end{verbatim}
+
+Because the file structure differs from the local working directory, we cannot push the local files to the remote repository yet. Instead, we need to first synchronize the local folder with the online version.
+
+
+
+\bibliography{D:/Dissertation/Literature/Dissertation1}
+\bibliographystyle{aea}
+
+\end{document}
