@@ -7,8 +7,3 @@ This repository contains the source Code for my note "Using Modern Programming T
 Version
 ----
 July 11, 2019
-
-Test
----
-test --amend
-now change that to amend
