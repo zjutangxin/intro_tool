@@ -189,9 +189,16 @@ which will then ask for the user name and credentials for the GitHub account whe
 
 Now if you go to the online portal of GitHub, you should see the local files are all synchronized. From now on, anytime you have modified some files and would like to save the current status of the whole project, simply type
 \begin{verbatim}
-$ git commit -a -m 'commit message'
+$ git add <fliename.extension>
 \end{verbatim}
-to commit all the modified files.
+to stage the files you want to commit (case sensitive), and 
+\begin{verbatim}
+$ git commit -m 'commit message'
+\end{verbatim}
+to commit all the changes. Notice that sometimes after you make a commit, immediately you may realize that you forgot to include a file or two, or you have made a typo in the commit message, you do not want to flood your commit history with small commit like this. In such situation, use the \code{--amend} option to replace the most recent commit using the current one:
+\begin{verbatim}
+$ git commit --amend -m 'commit message'
+\end{verbatim}
 
 \bibliography{D:/Dissertation/Literature/Dissertation1}
 \bibliographystyle{aea}
