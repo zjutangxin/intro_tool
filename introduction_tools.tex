@@ -159,10 +159,35 @@ which fetches everything on the remote repository and labels the remote reposito
 $ git add ./**/*.f90
   git add ./*.tex
 \end{verbatim}
+We can then see the status of the current branch by
+\begin{verbatim}
+$ git status -uno
+\end{verbatim}
+where the option \code{-uno} suppresses the display of untracked files. We then commit all the files by
+\begin{verbatim}
+$ git commit -m 'initialize local files'
+\end{verbatim}
+Notice that, each commit must always come with a committing message, otherwise \code{Git} aborts the current commit.
 
-Because the file structure differs from the local working directory, we cannot push the local files to the remote repository yet. Instead, we need to first synchronize the local folder with the online version.
+With all the preparation, we push all the files to the remote repository by
+\begin{verbatim}
+$ git push origin master
+\end{verbatim}
+which will then ask for the user name and credentials for the GitHub account where you have write permission. When executed, the terminal prints the following message:
+\begin{verbatim}
+> Username for 'https://github.com': zjutangxin
+  Password for 'https://zjutangxin@github.com':
+  Counting objects: 10, done.
+  Delta compression using up to 8 threads.
+  Compressing objects: 100% (10/10), done.
+  Writing objects: 100% (10/10), 579.00 KiB | 0 bytes/s, done.
+  Total 10 (delta 1), reused 0 (delta 0)
+  remote: Resolving deltas: 100% (1/1), done.
+  To https://github.com/zjutangxin/intro_tool
+     319c5e7..c91de67  master -> master
+\end{verbatim}
 
-
+Now if you go to the online portal of GitHub, you should see the local files are all synchronized.
 
 \bibliography{D:/Dissertation/Literature/Dissertation1}
 \bibliographystyle{aea}
