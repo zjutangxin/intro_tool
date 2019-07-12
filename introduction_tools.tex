@@ -1,7 +1,7 @@
 % Article Format: American Economic Review
 % Xin Tang @ Stony Brook University
 % Last Updated: August 2014
-\documentclass[twoside,12pt,leqno]{article}
+\documentclass[twoside,11pt,leqno]{article}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                    Text Layout                       %
@@ -112,6 +112,39 @@
 \captionsetup[figure]{labelsep=period}
 \usepackage{graphicx,pstricks,epstopdf}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                 Insert Code Snippet                  %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{listings,textcomp,upquote}
+\lstset{
+     language=fortran,
+     frame = single,
+%     backgroundcolor=\color[RGB]{255,228,202}, % pink
+     backgroundcolor=\color[RGB]{231,240,233}, % green
+%     backgroundcolor=\color[RGB]{239,240,248},
+     framerule=0pt,
+     showstringspaces=false,
+     basicstyle=\ttfamily\footnotesize,
+     numbers=left,
+     stepnumber=1,
+     numberstyle=\tiny,
+     keywordstyle=\color{blue}\ttfamily,
+     stringstyle=\color{red}\ttfamily,
+     commentstyle=\color[rgb]{.133,.545,.133}\ttfamily,
+     morecomment=[l][\color{magenta}]{\#},
+     fontadjust,
+     captionpos=t,
+     framextopmargin=2pt,framexbottommargin=2pt,
+     abovecaptionskip=4ex,belowcaptionskip=3pt,
+     belowskip=3pt,
+     framexleftmargin=4pt,
+     xleftmargin=4em,xrightmargin=4em,
+     texcl=false,
+     extendedchars=false,columns=flexible,mathescape=true,
+     captionpos=b,
+}
+\renewcommand{\lstlistingname}{Source Code}
+
 \title{\vspace{-1cm}\Large{{\textsf{Using Modern Programming Tools in Macroeconomics}}}}
 \author{\normalsize\textsc{Xin Tang} \\ \normalsize\textsc{International Monetary Fund}}
 \date{\normalsize\today}
@@ -143,6 +176,95 @@ The note is organized as follows. We begin with an example of solving a system o
 
 \section{Compiling a Sophisticated Project}
 
+\subsection{Using MINPACK}
+
+Consider the following example of solving a system of nonlinear equations in $\vec{x} = [x_1, x_2, x_3]$:
+\begin{align*}
+    f_1(\vec{x}) &= x_1 + \e^{x_1-1} + (x_2+x_3)^2 - 27 \\
+    f_2(\vec{x}) &= \e^{x_2-2}/x_1 + x_3^2 - 10 \\
+    f_3(\vec{x}) &= x_3 + \sin(x_2-2) + x_2^2 - 7.
+\end{align*}
+It is easy to verify that the true solution is $\vec{x} = [1,2,3]$. Code \ref{lst:hybrd}, which is saved as the text file \newline \code{./src/minpack\_ex.f90}, solves the problem.
+\lstinputlisting[caption={Example: \code{hybrd}},label={lst:hybrd}
+]{./src/minpack_ex.f90}
+Similarly, the source code of \code{MINPACK} is saved as the text file \code{./lib\_src/minpack.f90}. Therefore, to compile the program, we invoke the following command in Shell
+\begin{verbatim}
+$ gfortran ./src/minpack_ex.f90 ./lib_src/minpack.f90 -o minpack_ex.out -Ofast
+\end{verbatim}
+This generates an executable file \code{minpack\_ex.out} under the root directory. Execute the program, the terminal prints the following information
+\begin{verbatim}
+fnorm =  2.3536E-007
+ info =            1
+    x =  1.0000    2.0000    3.0000
+\end{verbatim}
+
+Now you may notice that by the above command, every time we compile the source code to generate the executable, \code{minpack.f90} is compiled again. This can be very time consuming if the library is large and optimization at compiling stage is applied. It would make much more sense to just compile \code{minpack.f90} once given that we do not change anything at all later when calling any routines inside, and later just recompile the code that calls the routines in \code{MINPACK}. This is done by compiling files independently.
+
+In particular, with option \code{-c}, \code{gfotran} can turn the source code into a binary object file. When object files are supplied as input, \code{gfortran} automatically invokes the \textit{linker} to patch the object files together and generate an executable file. Hence in practice, only the object files that have been modified need to be recompiled. Specifically, we use the following shell commands to generate two corresponding \code{.o} object files, save them under the subdirectory \code{./obj/}, and then patch them together to generate the executable:
+\begin{verbatim}
+$ gfortran -c ./src/minpack_ex.f90 -o ./obj/minpack.ex.o -Ofast
+$ gfortran -c ./lib_src/minpack.f90 -o ./obj/minpack.o -Ofast
+$ gfortran ./obj/minpack_ex.o ./obj/minpack.o -o minpack_ex.out -Ofast
+\end{verbatim}
+The next time when we change anything \textit{only} in \code{minpack\_ex.f90}, we only need to recompile itself but not \code{minpack.f90}.
+
+\subsection{Understand How Linker Works}
+
+Better though, we can use the archiver to turn a number of object files into one \code{.a} library file. To build a library from \code{minpack.o}, use the following command
+\begin{verbatim}
+$ ar cr libminpack.a ./obj/minpack.o
+\end{verbatim}
+where the option \code{cr} stands for \textit{create} and \textit{replace}. Now if you use any archiver or data compression program to open \code{libminpack.a}, you will find the text file \code{1.txt}, which contains all the functions defined by \code{minpack.f90}. The content of \code{1.txt} is shown is Code \ref{lst:minpack}.
+\lstinputlisting[caption={The List of Routines in MINPACK},label={lst:minpack}
+]{./obj/1.txt}
+In practice, linker uses the information in \code{1.txt} to resolve symbol reference.
+
+Since a library is nothing but a collection of \code{.o} object files, it can be used in the linking stage in pretty much the same way as ordinary object files:
+\begin{verbatim}
+$ gfortran ./src/minpack_ex.f90 ./obj/libminpack.a -o minpack_ex.out -Ofast
+\end{verbatim}
+where again
+\begin{verbatim}
+$ ./minpack_ex.out
+\end{verbatim}
+delivers the same results.
+
+\subsection{Using \code{LAPACK}, \code{BLAS}, and \code{ATLAS}}
+
+Now we can explain how \code{LAPACK}, \code{BLAS}, and \code{ATLAS} can be used in practice since these libraries are distributed in both static (\code{.a}) and dynamic library (\code{.so}) formats.
+
+First, you need to install these libraries in your system. I am using Ubuntu under WSL, so the commands are
+\begin{verbatim}
+$ sudo apt-get install libblas-dev
+$ apt-get install libatlas-base-dev
+$ sudo apt-get install liblapack-dev
+\end{verbatim}
+for \code{BLAS}, \code{ATLAS}, and \code{LAPACK} respectively.
+
+Now let us solve the example of OLS in IMSL. The objective is to do a linear regression with three independent variables
+\begin{equation*}
+    y_i = \beta_0 + \beta_1 x_{1i} + \beta_2 x_{2i} + \beta_3 x_{3i} + \varepsilon_i,
+\end{equation*}
+on data
+\begin{equation*}
+    \vec{X} = \begin{bmatrix}
+        7.0  & 5.0  & 6.0 \\
+        2.0  & -1.0 & 6.0 \\
+        7.0  & 3.0  & 5.0 \\
+        -3.0 & 1.0  & 4.0 \\
+        2.0  & -1.0 & 0.0 \\
+        2.0  & 1.0  & 7.0 \\
+        -3.0 & -1.0 & 3.0 \\
+        2.0  & 1.0  & 1.0 \\   
+        2.0  & 1.0  & 4.0 \end{bmatrix} \qquad 
+    \vec{Y} = \begin{bmatrix}
+        7.0 \\ -5.0 \\ 6.0 \\ 5.0 \\ 5.0 \\ -2.0 \\ 0.0 \\ 8.0 \\ 3.0 \end{bmatrix}    
+\end{equation*}
+Using any standard statistical software, it is very easy to verify that the OLS estimate is
+\begin{equation*}
+    \gvec{\upbeta} = \begin{bmatrix} 7.73 & -0.20 & 2.33 & -1.67 \end{bmatrix}.
+\end{equation*}
+Now let us use \code{LAPACK} to solve the problem. To do this, we need to call the routine \code{DGELS}.
 
 \section{Version Control and Collaboration}
 

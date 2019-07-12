@@ -6,8 +6,9 @@ introduction_tools.brf
 introduction_tools.log
 introduction_tools.out
 introduction_tools.out.bak
+introduction_tools.tex.sav
 introduction_tools.synctex.gz
 introduction_tools.tex.bak
 lib_src/fgsl-1.2.0.tar.gz
-obj/*.o
+obj/*.*
 *.out
