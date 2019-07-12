@@ -255,16 +255,25 @@ on data
         2.0  & -1.0 & 0.0 \\
         2.0  & 1.0  & 7.0 \\
         -3.0 & -1.0 & 3.0 \\
-        2.0  & 1.0  & 1.0 \\   
-        2.0  & 1.0  & 4.0 \end{bmatrix} \qquad 
+        2.0  & 1.0  & 1.0 \\
+        2.0  & 1.0  & 4.0 \end{bmatrix} \qquad
     \vec{Y} = \begin{bmatrix}
-        7.0 \\ -5.0 \\ 6.0 \\ 5.0 \\ 5.0 \\ -2.0 \\ 0.0 \\ 8.0 \\ 3.0 \end{bmatrix}    
+        7.0 \\ -5.0 \\ 6.0 \\ 5.0 \\ 5.0 \\ -2.0 \\ 0.0 \\ 8.0 \\ 3.0 \end{bmatrix}
 \end{equation*}
 Using any standard statistical software, it is very easy to verify that the OLS estimate is
 \begin{equation*}
     \gvec{\upbeta} = \begin{bmatrix} 7.73 & -0.20 & 2.33 & -1.67 \end{bmatrix}.
 \end{equation*}
-Now let us use \code{LAPACK} to solve the problem. To do this, we need to call the routine \code{DGELS}.
+Now let us use \code{LAPACK} to solve the problem. To do this, we need to call the routine \code{DGELS}. Code \ref{lst:lapack} does the job.
+\lstinputlisting[caption={Example: \code{LAPACK}},label={lst:lapack}
+]{./src/lapack_ex.f90}
+
+To compile the file, we use the following command
+\begin{verbatim}
+$ gfortran ./src/lapack_ex.f90 -llapack -latlas -lblas \
+    -Ofast -o lapack_ex.out
+\end{verbatim}
+where \code{\textbackslash} indicates a break of the line.
 
 \section{Version Control and Collaboration}
 

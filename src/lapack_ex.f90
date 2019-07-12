@@ -34,11 +34,15 @@ program lapack_ex
     real(dp), allocatable, dimension(:) :: work
 
     A = 1.0_dp
-    A(:,2) = (/ 7.0_dp, 2.0_dp, 7.0_dp, -3.0_dp, 2.0_dp, 2.0_dp, -3.0_dp, 2.0_dp, 2.0_dp /)
-    A(:,3) = (/ 5.0_dp, -1.0_dp, 3.0_dp, 1.0_dp, -1.0_dp, 1.0_dp, -1.0_dp, 1.0_dp, 1.0_dp /)       
-    A(:,4) = (/ 6.0_dp, 6.0_dp, 5.0_dp, 4.0_dp, 0.0_dp, 7.0_dp, 3.0_dp, 1.0_dp, 4.0_dp /)        
+    A(:,2) = (/ 7.0_dp, 2.0_dp, 7.0_dp, -3.0_dp, 2.0_dp, &
+        2.0_dp, -3.0_dp, 2.0_dp, 2.0_dp /)
+    A(:,3) = (/ 5.0_dp, -1.0_dp, 3.0_dp, 1.0_dp, -1.0_dp, &
+        1.0_dp, -1.0_dp, 1.0_dp, 1.0_dp /)       
+    A(:,4) = (/ 6.0_dp, 6.0_dp, 5.0_dp, 4.0_dp, 0.0_dp, &
+        7.0_dp, 3.0_dp, 1.0_dp, 4.0_dp /)        
 
-    B = (/ 7.0_dp, -5.0_dp, 6.0_dp, 5.0_dp, 5.0_dp, -2.0_dp, 0.0_dp, 8.0_dp, 3.0_dp /)
+    B = (/ 7.0_dp, -5.0_dp, 6.0_dp, 5.0_dp, 5.0_dp, &
+        -2.0_dp, 0.0_dp, 8.0_dp, 3.0_dp /)
 
     ! Query the optimal workspace
     call dgels('N',m,n,nrhs,A,lda,B,ldb,workquery,lwork,info)
