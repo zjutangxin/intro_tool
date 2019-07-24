@@ -10,5 +10,7 @@ introduction_tools.tex.sav
 introduction_tools.synctex.gz
 introduction_tools.tex.bak
 lib_src/fgsl-1.2.0.tar.gz
+src/test_intent.f90
+src/*.txt
 obj/*.*
 *.out

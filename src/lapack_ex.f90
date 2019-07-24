@@ -48,6 +48,7 @@ program lapack_ex
     call dgels('N',m,n,nrhs,A,lda,B,ldb,workquery,lwork,info)
 
     lwork = int(workquery(1))
+    write (*,*) 'lwork = ', lwork
     allocate(work(lwork))
 
     ! Do the OLS
